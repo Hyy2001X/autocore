@@ -46,24 +46,28 @@
 			"sysctl -n -e net.nf_conntrack_max net.ipv4.netfilter.ip_conntrack_max"
 		):match("%d+")) or 4096
 
-		local cpu_info = luci.sys.exec("cpuinfo")
+		local cpu_info = luci.sys.exec("sysinfo cpuinfo")
 
 		local eth_info = luci.sys.exec("ethinfo")
 
-		local user_info = luci.sys.exec("grep 'br-lan' /proc/net/arp | grep '0x2' | grep -v '0x0' | wc -l") or 0
+		local user_info = luci.sys.exec("sysinfo user_info") or 0
 		
-		local cpu_usage = (luci.sys.exec("expr 100 - $(top -n 1 | grep 'CPU:' | awk -F '%' '{print$4}' | awk -F ' ' '{print$2}')") or "6") .. "%"
+		local cpu_usage = luci.sys.exec("sysinfo cpu_usage") or 0
 
 		local sys_uptime = luci.sys.exec("sysinfo uptime")
 
+		local time = luci.sys.exec("sysinfo time")
+
+		local url = luci.sys.exec("sysinfo url")
+
 		local rv = {
+			url		   = url,
 			cpuusage   = cpu_usage,
 			cpuinfo    = cpu_info,
 			ethinfo    = eth_info,
 			userinfo   = user_info,
 			sysuptime  = sys_uptime,
-			uptime     = sysinfo.uptime or 0,
-			localtime  = os.date(),
+			time 	   = time,
 			loadavg    = sysinfo.load or { 0, 0, 0 },
 			memory     = meminfo,
 			memcached  = mem_cached,
@@ -664,11 +668,11 @@
 				e.innerHTML = "<tr>" + tmp + "</tr>";
 			}
 
-			if (e = document.getElementById('localtime'))
-				e.innerHTML = info.localtime;
+			if (e = document.getElementById('url'))
+				e.innerHTML = info.url;
 
-			if (e = document.getElementById('uptime'))
-				e.innerHTML = String.format('%t', info.uptime);
+			if (e = document.getElementById('time'))
+				e.innerHTML = info.time;
 
 			if (e = document.getElementById('sysuptime'))
 				e.innerHTML = info.sysuptime;
@@ -728,14 +732,13 @@
 
 	<table width="100%" cellspacing="10">
 		<tr><td width="33%"><%:Hostname%></td><td><%=luci.sys.hostname() or "?"%></td></tr>
-		<tr><td width="33%"><%:Model%></td><td><%=pcdata(boardinfo.model or "?")%> <%=luci.sys.exec("cat /etc/bench.log") or " "%></td></tr>
+		<tr><td width="33%"><%:CPU Model%></td><td><%=pcdata(boardinfo.model or "?")%> <%=luci.sys.exec("cat /etc/bench.log") or " "%></td></tr>
 		<tr><td width="33%"><%:CPU Info%></td><td id="cpuinfo">-</td></tr>
 		<tr><td width="33%"><%:Firmware Version%></td><td>
-			<%=pcdata(ver.distname)%> <%=pcdata(ver.distversion)%> /
-			<%=pcdata(ver.luciname)%> (<%=pcdata(ver.luciversion)%>)
+			<%=pcdata(ver.distname)%> <%=pcdata(ver.distversion)%>
 		</td></tr>
 		<tr><td width="33%"><%:Kernel Version%></td><td><%=unameinfo.release or "?"%></td></tr>
-		<tr><td width="33%"><%:Local Time%></td><td id="localtime">-</td></tr>
+		<tr><td width="33%"><%:Local Time%></td><td id="time">-</td></tr>
 		<tr><td width="33%"><%:Uptime%></td><td id="sysuptime">-</td></tr>
 		<tr><td width="33%"><%:Load Average%></td><td id="loadavg">-</td></tr>
 		<tr><td width="33%"><%:CPU usage (%)%></td><td id="cpuusage">-</td></tr>

@@ -23,11 +23,11 @@ start()
 	uci commit network
 	
 	a=$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq)
-	b=$(echo -n ' : ')
+	b=$(echo -n ' | ')
 	c=$(cat /proc/cpuinfo | grep 'core id' | sort -u | wc -l)
-	d=$(echo -n ' Core ')
+	d=$(echo -n ' 核心 ')
 	e=$(cat /proc/cpuinfo | grep 'processor' | wc -l)
-	f=$(echo -n ' Thread ')
+	f=$(echo -n ' 线程 ')
 	g=${a}${b}${c}${d}${e}${f}
 
 	mkdir -p /tmp/sysinfo

@@ -1,9 +1,45 @@
+#!/bin/sh
+
+user_info() {
+	grep 'br-lan' /proc/net/arp | grep '0x2' | grep -v '0x0' | wc -l
+}
+
 memory() {
 	free | grep Mem | awk '{a=$7*100/$2;b=$7/1024;c=$2/1024} {printf("%.1fM Avaiable | %.1f%% of %.1fM\n",b,a,c)}'
 }
 
 uptime() {
 	awk '{a=$1/86400;b=($1%86400)/3600;c=($1%3600)/60;d=($1%60)} {printf("%d 天 %d 小时 %d 分钟 %d 秒\n",a,b,c,d)}' /proc/uptime
+}
+
+time() {
+	date "+%A [%W] | [%j] %Y/%m/%d-%X %Z"
+}
+
+cpu_usage() {
+	echo "Nice: $(expr 100 - $(top -n 1 | grep 'CPU:' | awk -F '%' '{print $4}' | awk -F ' ' '{print $2}'))% | Main: $(top -n 1 | grep 'CPU:' | awk -F '%' '{print $1}' | awk -F ' ' '{print $2}')%"
+}
+
+cpu_info() {
+	CORES=$(awk -F '[ :]' '/cpu cores/ {print $4;exit}' /proc/cpuinfo)
+	SENSORS="$(sensors 2>/dev/null | grep 'Core 0')"
+	if [ "${CORES}" -le 2 ]
+	then
+		MHz="$(grep 'MHz' /proc/cpuinfo | cut -c12- | sed -n '1p')"
+		[ -n "${SENSORS}" ] && TEMP="(+$(sensors 2>/dev/null | grep 'Core 0' | awk '{print $3}' | cut -d '+' -f2))"
+	else
+		MHz="$(echo "$(grep 'MHz' /proc/cpuinfo | awk '{Freq_Sum += $4};END {print Freq_Sum}') / ${CORES}" | bc)"
+		[ -n "${SENSORS}" ] && TEMP="(+$(echo "$(sensors | grep Core | awk '{Sum += $3};END {print Sum}') / ${CORES}" | bc)°C)"
+	fi
+	echo "${MHz} MHz ${TEMP}"
+}
+
+url() {
+	URL=$(awk '{print $4}' /proc/version | cut -d '@' -f2 2> /dev/null | cut -d ')' -f1)
+	if [ "$(echo -n ${URL} | grep -q 'http' ; echo $?)" = 0 ]
+	then
+		echo ${URL}
+	fi
 }
 
 $*
