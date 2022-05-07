@@ -46,7 +46,7 @@
 			"sysctl -n -e net.nf_conntrack_max net.ipv4.netfilter.ip_conntrack_max"
 		):match("%d+")) or 4096
 
-		local cpu_info = luci.sys.exec("sysinfo cpuinfo")
+		local cpu_info = luci.sys.exec("sysinfo cpu_info")
 
 		local eth_info = luci.sys.exec("ethinfo")
 
