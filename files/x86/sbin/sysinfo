@@ -42,4 +42,14 @@ url() {
 	fi
 }
 
+upnp_info() {
+	if [ "$(uci get upnpd.config.enabled)" != 1 ]
+	then
+		echo "Not Enabled"
+		return
+	fi
+	upnp_lease=$(uci get upnpd.config.upnp_lease_file)
+	cat ${upnp_lease} 2> /dev/null | wc -l
+}
+
 $*
