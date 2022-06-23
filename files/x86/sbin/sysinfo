@@ -17,7 +17,7 @@ time() {
 }
 
 cpu_usage() {
-	echo "Nice: $(expr 100 - $(top -n 1 | grep 'CPU:' | awk -F '%' '{print $4}' | awk -F ' ' '{print $2}'))% | Main: $(top -n 1 | grep 'CPU:' | awk -F '%' '{print $1}' | awk -F ' ' '{print $2}')%"
+	echo "$(expr 100 - $(top -n 1 | grep 'CPU:' | awk -F '%' '{print $4}' | awk -F ' ' '{print $2}'))%"
 }
 
 cpu_info() {
